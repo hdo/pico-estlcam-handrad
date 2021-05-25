@@ -214,8 +214,6 @@ void i2c0_irq_handler() {
         // reset heads
         tx_head = 0;
         rx_head = 0;
-        printf("ABRT %d \r\n", *I2C0_RAW_INTR_STAT);
-        printf("ABRT %d \r\n", *I2C0_TX_ABRT_SOURCE);
         *I2C0_CLR_TX_ABRT;
     }
 
@@ -244,7 +242,6 @@ void i2c0_irq_handler() {
 
         // Read the data (this will clear the interrupt)
         uint32_t value = *I2C0_DATA_CMD;
-        //printf("%02X ", value);
 
         // Check if this is the 1st byte we have received
         if (value & I2C_DATA_CMD_FIRST_BYTE) {
@@ -258,7 +255,7 @@ void i2c0_irq_handler() {
         if (rx_head == READ_SIZE) {
             printhex(rxdata, READ_SIZE);
             mode_selected = rxdata[0];
-            printf("mode: %d \r\n", mode_selected);
+            //printf("mode: %d \r\n", mode_selected);
 
             switch(mode_selected) {
                 case 1 : mode_normal(); break;
@@ -440,13 +437,6 @@ int main() {
         adc_y_raw = adc_read() * 65500/4096;
         adc_select_input(2);
         adc_z_raw = adc_read() * 65500/4096;
-
-        /*
-        if (current_tick() - last_trigger > 2000) {
-            last_trigger = current_tick();
-            printf("x: %d     y: %d   z: %d  f:  %d   s: %d   \r\n", adc_x_raw, adc_y_raw, adc_z_raw, adc_feed_raw, adc_spindle_raw);
-        }
-        */
 
     }
 }
