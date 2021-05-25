@@ -51,6 +51,10 @@ Poti und Joystickstellungen sind 16 Bit Unsigned Integer von 0 bis 65535.
 #define MODEID_CHALLENGE 4
 #define MODEID_SERIAL    5
 
+#define BUTTON_SHIFT_PROG    0
+#define BUTTON_SHIFT_SPINDLE 1
+#define BUTTON_SHIFT_OK      3
+
 
 // define the hardware registers used
 volatile uint32_t * const I2C0_DATA_CMD       = (volatile uint32_t * const)(I2C0_BASE + 0x10);
@@ -154,6 +158,13 @@ void update_adc_values() {
     txdata[10] = 0xFF & adc_z_raw;
     txdata[11] = adc_z_raw >> 8;          
 }
+
+void update_button_states() {
+    txdata[1] = 0b11110100 
+        | button_prog.state << BUTTON_SHIFT_PROG 
+        | button_spindle.state << BUTTON_SHIFT_SPINDLE 
+        | button_ok.state << BUTTON_SHIFT_OK;
+} 
 
 void mode_normal() {
     // reset
@@ -273,6 +284,7 @@ void i2c0_irq_handler() {
 
         if (mode_selected == MODEID_NORMAL) {
             update_adc_values();
+            update_button_states();
         }
 
         txdata[13] = frame_num++;
@@ -364,12 +376,17 @@ int main() {
     encoder_feed.factor = 2;
     encoder_feed.current_value = 100;
 
+    button_ok.gpio_a = GPIO_OK;
+    button_spindle.gpio_a = GPIO_SPINDLE;
+    button_prog.gpio_a = GPIO_PROG;
+
+
     // blinky
-    for(int i=0; i < 5; i++) {
+    for(int i=0; i < 3; i++) {
         gpio_put(LED_PIN, 0);
-        sleep_ms(200);
+        sleep_ms(100);
         gpio_put(LED_PIN, 1);
-        sleep_ms(200);
+        sleep_ms(100);
     }
 
     //setup_mock();
@@ -383,7 +400,6 @@ int main() {
 
     // Enable the interrupts we want
     *I2C0_INTR_MASK = (I2C_INTR_MASK_READ_REQ | I2C_INTR_MASK_RX_FULL | I2C_INTR_MASK_START_DET | I2C_INTR_MASK_STOP_DET | I2C_INTR_MASK_TX_ABRT);
-    //*I2C0_INTR_MASK = (I2C_INTR_MASK_READ_REQ | I2C_INTR_MASK_RX_FULL);
 
     // Set up the interrupt handlers
     irq_set_exclusive_handler(I2C0_IRQ, i2c0_irq_handler);
@@ -403,6 +419,9 @@ int main() {
 
         rotary_task2(&encoder_spindle);
         rotary_task2(&encoder_feed);
+        button_task(&button_ok);
+        button_task(&button_spindle);
+        button_task(&button_prog);
 
         if (last_value_spindle != encoder_spindle.current_value) {
             last_value_spindle = encoder_spindle.current_value;
@@ -422,10 +441,12 @@ int main() {
         adc_select_input(2);
         adc_z_raw = adc_read() * 65500/4096;
 
+        /*
         if (current_tick() - last_trigger > 2000) {
             last_trigger = current_tick();
             printf("x: %d     y: %d   z: %d  f:  %d   s: %d   \r\n", adc_x_raw, adc_y_raw, adc_z_raw, adc_feed_raw, adc_spindle_raw);
         }
+        */
 
     }
 }
