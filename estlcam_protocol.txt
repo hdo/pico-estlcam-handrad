@@ -1,0 +1,91 @@
+Beschreibung Betriebsart 2:
+###########################
+
+Pinbelegung:
+Pin 1: GND
+Pin 2: SDA / Serial Data
+Pin 3: +5V
+Pin 4: Encoder A
+Pin 5: SCL / Serial Clock
+Pin 6: Encoder B
+
+TWI / I2C Datentransfer Steuerung Richtung Handrad:
+
+Jedes Datenframe besteht aus 9 Bytes:
+Byte 1 = Befehl bzw. Modus in den das Handrad gehen soll.
+Byte 2-9 = Daten (Altlast ohne Funktion - einfach einlesen und ignorieren)
+
+Gültige Befehle für Byte 1 sind:
+1: Normale Übertragung der Handrad-Daten.
+3: Aufforderung zur Identifizierung: Das Handrad muss mit "Handrad 0001" antworten - sonst wird es nicht von der Steuerung akzeptiert.
+4: Challenge: Überbleibsel eines Kopierschutzes. Das Handrad muss mit Hexadezimal "3B59E82AE9B1BED800000000" antworten - sonst wird es zumindest von älteren Estlcam Versionen abgelehnt.
+5: Seriennummer Atmega328PB: Das Handrad sollte die Seriennummer des Chips übertragen (10 Byte + 2 Bytes "0" zur Vervollständigung des Datenframes), darf allerdings auch mit Fantasiedaten antworten.
+Der Befehl bzw. Modus bleibt aktiv bis ein anderer Befehl kommt. Kommt z.b. der Befehl zur Identifizierung muss das Handrad solange damit antworten bis explizit ein anderer Befehl kommt.
+TWI / I2C Datentransfer Handrad Richtung Steuerung:
+
+Jedes Datenframe besteht aus 15 Bytes:
+Bytes 1-12 = Daten
+Byte 13 = Modus / dieses Byte muss dem aktuellen Modus bzw. ausgeführten Befehl entsprechen.
+Byte 14 = Frame / mit jeder Übertragung muss dieses Byte um 1 hochgezählt werden. Ändert sich dieses Byte nicht mehr geht die Steuerung von einem Problem mit dem Handrad aus, stoppt die Bewegung und versucht einen Reset der Kommunikation.
+Byte 15 = Prüfsumme / Frames deren Prüfsumme inkorrekt ist werden verworfen um keine ungewollten Aktionen auszulösen
+Berechnung der Prüfsumme:
+Prüfsumme auf 0 setzen.
+Bytes 1 bis 14 mit Exclusiv Oder verknüfen und nach jedem Byte die Prüfsumme zusätzlich um 1 erhöhen.
+Prüfsumme = 0
+Prüfsumme XOR Byte 1
+Prüfsumme = Prüfsumme +1
+Prüfsumme XOR Byte 2
+Prüfsumme = Prüfsumme +1
+Prüfsumme XOR Byte 3
+Prüfsumme = Prüfsumme +1
+usw...
+
+
+Datenframe Modus 1:
+###################
+Byte 1: 255 (Altlast - muss 255 zurückgeben, sonst ggf. Probleme!)
+Byte 2:
+Bit 0 = Start / Stopp Taste Programmstart (1 = nicht gedrückt / 0 = gedrückt)
+Bit 1 = Start / Stopp Taste Fräsmotor (1 = nicht gedrückt / 0 = gedrückt)
+Bit 2 = 1 (sonst ggf. Probleme!)
+Bit 3 = "OK" Taste (1 = nicht gedrückt / 0 = gedrückt)
+Bit 4 bis 7 = 1 (sonst ggf. Probleme!)
+Byte 3: Low Byte Vorschub Poti
+Byte 4: High Byte Vorschub Poti
+Byte 5: Low Byte Drehzahl Poti
+Byte 6: High Byte Drehzahl Poti
+Byte 7: Low Byte X Joystick
+Byte 8: High Byte X Joystick
+Byte 9: Low Byte Y Joystick
+Byte 10: High Byte Y Joystick
+Byte 11: Low Byte Z Joystick
+Byte 12: High Byte Z Joystick
+Byte 13: 1 (Modus)
+Byte 14: Frame (ständig durchlaufend 0-255)
+Byte 15: Prüfsumme (siehe Berechnung der Prüfsumme)
+Poti und Joystickstellungen sind 16 Bit Unsigned Integer von 0 bis 65535.
+
+
+Datenframe Modus 3:
+###################
+Byte 1-12: "Handrad 0001"
+Byte 13: 3 (Modus)
+Byte 14: Frame (ständig durchlaufend 0-255)
+Byte 15: Prüfsumme (siehe Berechnung der Prüfsumme)
+
+
+Datenframe Modus 4:
+###################
+Byte 1-12: Hexadezimal "3B59E82AE9B1BED800000000"
+Byte 13: 4 (Modus)
+Byte 14: Frame (ständig durchlaufend 0-255)
+Byte 15: Prüfsumme (siehe Berechnung der Prüfsumme)
+
+
+Datenframe Modus 5:
+###################
+Byte 1-10: Seriennummer AVR Chip
+Byte 11-12: Auffüllen mit "0"
+Byte 13: 5 (Modus)
+Byte 14: Frame (ständig durchlaufend 0-255)
+Byte 15: Prüfsumme (siehe Berechnung der Prüfsumme)
