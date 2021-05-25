@@ -19,6 +19,11 @@ https://www.estlcam.de/DIN_Detail.php
 ![Pinout](doc/pi_pico_pinout.png)
 
 
+## Bilder
+
+
+![Pinout](doc/images/handrad001.png)
+
 ## Links:
 
 Estlcam LPT / Parallelport Adapter:
