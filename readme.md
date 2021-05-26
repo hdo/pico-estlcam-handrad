@@ -26,6 +26,10 @@ https://www.estlcam.de/DIN_Detail.php
 
 ![Pinout](doc/images/handrad002.png)
 
+## Stückliste:
+
+[Siehe hier](doc/bom.md)
+
 ## Links:
 
 Estlcam LPT / Parallelport Adapter:
