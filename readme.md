@@ -35,6 +35,10 @@ https://www.estlcam.de/DIN_Detail.php
 
 [Aktuelle Version](https://github.com/hdo/pico-estlcam-handrad/releases/tag/v0.0.1)
 
+## Gehäuse
+
+https://www.thingiverse.com/thing:4871639
+
 ## Links:
 
 Estlcam LPT / Parallelport Adapter:

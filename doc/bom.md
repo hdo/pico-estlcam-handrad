@@ -9,5 +9,5 @@ Anzahl | Teil | Link
 2 | Drehencoder (Feed, Spindle) | https://www.amazon.de/gp/product/B08728PS6N/
 3 | Buttons  | https://www.aliexpress.com/item/4001102500659.html
 1 | Mini-DIN Kabel (6 Pol) | https://www.amazon.de/Goobay-Tastatur-Maus-Verl%C3%A4ngerungskabel-Mini-DIN-6-Stecker/dp/B000YIVN4A/
-1 | Gehäuse (3D Druck) | Thingiverse (... kommt noch)
+1 | Gehäuse (3D Druck) | https://www.thingiverse.com/thing:4871639
 n | Kleinteile (Schrauben, Litzen/Kabel, etc. )
